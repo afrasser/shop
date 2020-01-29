@@ -9,6 +9,9 @@ namespace Shop.Web.Data.Entities
     public class Product
     {
         public int Id { get; set; }
+
+        [MaxLength(50, ErrorMessage = "The filed {0} must be less than 50 characters.")]
+        [Required]
         public string Name { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:C2}", ApplyFormatInEditMode = false)]
