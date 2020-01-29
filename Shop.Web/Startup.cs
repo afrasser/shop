@@ -22,11 +22,14 @@ namespace Shop.Web
         {
             services.AddControllersWithViews();
 
-            // Set local dabatase
+            // Set local dabatase connection injectable on any class constructor
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            // Inject Db Seed Service
+            services.AddTransient<SeedDb>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
