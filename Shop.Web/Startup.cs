@@ -28,11 +28,18 @@ namespace Shop.Web
                 options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            /*
+             * Transient objects are always different; a new instance is provided to every controller and every service.
+             * Scoped objects are the same within a request, but different across different requests.
+             * Singleton objects are the same for every object and every request.
+             */
+
             // Inject Db Seed Service
             services.AddTransient<SeedDb>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // Middleware
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

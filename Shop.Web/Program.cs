@@ -10,12 +10,12 @@ namespace Shop.Web
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            //RunSeeding((IWebHost)host);
+            //RunSeeding(host);
             host.Run();
         }
 
         // Seed Db before run
-        private static void RunSeeding(IWebHost host)
+        private static void RunSeeding(IHost host)
         {
             var scopeFactory = host.Services.GetService<IServiceScopeFactory>();
             using(var scope = scopeFactory.CreateScope())
