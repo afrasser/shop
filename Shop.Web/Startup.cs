@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shop.Web.Data;
 using Microsoft.EntityFrameworkCore;
+using Shop.Web.Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using Shop.Web.Data.Helpers;
 
 namespace Shop.Web
 {
@@ -36,6 +39,24 @@ namespace Shop.Web
 
             // Inject Db Seed Service
             services.AddTransient<SeedDb>();
+
+            // Inject repository
+            services.AddScoped<IRepository, Repository>();
+
+            // Inject user helper
+            services.AddScoped<IUserHelper, UserHelper>();
+
+            // Configure User registration rules
+            services.AddIdentity<User, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+                cfg.Password.RequireDigit = false;
+                cfg.Password.RequiredUniqueChars = 0;
+                cfg.Password.RequireLowercase = false;
+                cfg.Password.RequireNonAlphanumeric = false;
+                cfg.Password.RequireUppercase = false;
+                cfg.Password.RequiredLength = 6;
+            }).AddEntityFrameworkStores<DataContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,6 +76,9 @@ namespace Shop.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            // Add authentication service
+            app.UseAuthentication();
+            
             app.UseRouting();
 
             app.UseAuthorization();
