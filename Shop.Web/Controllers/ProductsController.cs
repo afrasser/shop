@@ -2,20 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using Shop.Web.Data;
 using Shop.Web.Data.Entities;
+using Shop.Web.Data.Helpers;
 using System.Threading.Tasks;
 
 namespace Shop.Web.Controllers
 {
     public class ProductsController : Controller
     {
-        //private readonly DataContext _context;
-
         private readonly IRepository repository;
+        private readonly IUserHelper userHelper;
 
-        public ProductsController(/*DataContext context*/IRepository repository)
+        public ProductsController(IRepository repository, IUserHelper userHelper)
         {
-            //_context = context;
             this.repository = repository;
+            this.userHelper = userHelper;
         }
 
         // GET: Products
@@ -51,6 +51,8 @@ namespace Shop.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                //TODO: Change how user are logged
+                product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
                 this.repository.AddProduct(product);
                 await repository.SaveAllAsync();
                 return RedirectToAction(nameof(Index));
@@ -88,6 +90,8 @@ namespace Shop.Web.Controllers
             {
                 try
                 {
+                    //TODO: Change for the logged user
+                    product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
                     this.repository.UpdateProduct(product);
                     await this.repository.SaveAllAsync();
                 }
