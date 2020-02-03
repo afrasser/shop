@@ -9,17 +9,17 @@ namespace Shop.Web.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly IRepository repository;
+        private readonly IProductRepository repository;
         private readonly IUserHelper userHelper;
 
-        public ProductsController(IRepository repository, IUserHelper userHelper)
+        public ProductsController(IProductRepository repository, IUserHelper userHelper)
         {
             this.repository = repository;
             this.userHelper = userHelper;
         }
 
         // GET: Products
-        public IActionResult Index() => View(this.repository.GetProducts());
+        public IActionResult Index() => View(this.repository.GetAll());
 
         // GET: Products/Details/5
         public IActionResult Details(int? id)
@@ -29,7 +29,7 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = this.repository.GetProduct(id.Value);
+            var product = this.repository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -53,8 +53,7 @@ namespace Shop.Web.Controllers
             {
                 //TODO: Change how user are logged
                 product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
-                this.repository.AddProduct(product);
-                await repository.SaveAllAsync();
+                await this.repository.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -68,7 +67,7 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = repository.GetProduct(id.Value);
+            var product = repository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -92,12 +91,11 @@ namespace Shop.Web.Controllers
                 {
                     //TODO: Change for the logged user
                     product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
-                    this.repository.UpdateProduct(product);
-                    await this.repository.SaveAllAsync();
+                    await this.repository.UpdateAsync(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!this.repository.ProductExists(product.Id))
+                    if (!await this.repository.ExistAsync(product.Id))
                     {
                         return NotFound();
                     }
@@ -119,7 +117,7 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = this.repository.GetProduct(id.Value);
+            var product = this.repository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -133,10 +131,10 @@ namespace Shop.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = this.repository.GetProduct(id);
-            this.repository.RemoveProduct(product);
-            await this.repository.SaveAllAsync();
+            var product = await this.repository.GetByIdAsync(id);
+            await this.repository.DeleteAsync(product);
             return RedirectToAction(nameof(Index));
         }
+
     }
 }
