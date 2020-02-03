@@ -40,8 +40,8 @@ namespace Shop.Web
             // Inject Db Seed Service
             services.AddTransient<SeedDb>();
 
-            // Inject repository
-            services.AddScoped<IRepository, Repository>();
+            // Inject product repository
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             // Inject user helper
             services.AddScoped<IUserHelper, UserHelper>();
