@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Web.Data;
 using Shop.Web.Data.Entities;
 using Shop.Web.Data.Helpers;
+using Shop.Web.Models;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Shop.Web.Controllers
 {
+    //TODO: Fix error on ProductsController
     public class ProductsController : Controller
     {
         private readonly IProductRepository repository;
@@ -47,12 +51,37 @@ namespace Shop.Web.Controllers
         // POST: Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(ProductViewModel product)
         {
             if (ModelState.IsValid)
             {
+                var path = string.Empty;
+
+                if (product.ImageFile != null && product.ImageFile.Length > 0)
+                {
+                    path = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot\\images\\products",
+                        product.ImageFile.FileName);
+
+                    // A simple way to use using statement
+                    using var stream = new FileStream(path, FileMode.Create);
+                    await product.ImageFile.CopyToAsync(stream);
+                }
+
+                path = $"~/images/products/{product.ImageFile.FileName}";
+
                 //TODO: Change how user are logged
                 product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
+
+                //TODO: Create generic mapper method
+                // this throws error: cannot convert from UserViewModel to Entity.User
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<ProductViewModel, Product>();
+                });
+                Product p = config.CreateMapper().Map<Product>(product);
+
                 await this.repository.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
