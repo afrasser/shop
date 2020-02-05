@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Web.Data;
 using Shop.Web.Data.Entities;
@@ -75,39 +74,78 @@ namespace Shop.Web.Controllers
                 product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
 
                 //TODO: Create generic mapper method
-                // this throws error: cannot convert from UserViewModel to Entity.User
+                /*
+                // fix image field mapping
                 var config = new MapperConfiguration(cfg =>
                 {
                     cfg.CreateMap<ProductViewModel, Product>();
                 });
                 Product p = config.CreateMapper().Map<Product>(product);
+                */
 
-                await this.repository.CreateAsync(product);
+                var _product = this.ToProduct(product, path);
+                await this.repository.CreateAsync(_product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
         }
 
+        private Product ToProduct(ProductViewModel view, string path)
+        {
+            return new Product
+            {
+                Id = view.Id,
+                ImageUrl = path,
+                IsAvailable = view.IsAvailable,
+                LastPurchase = view.LastPurchase,
+                LastSale = view.LastSale,
+                Name = view.Name,
+                Price = view.Price,
+                Stock = view.Stock,
+                User = view.User
+            };
+        }
+
+
         // GET: Products/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = repository.GetByIdAsync(id.Value);
+            var product = await repository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
             }
-            return View(product);
+
+            var view = this.ToProducViewModel(product);
+            return View(view);
         }
+
+        public ProductViewModel ToProducViewModel(Product product)
+        {
+            return new ProductViewModel
+            {
+                Id = product.Id,
+                ImageUrl = product.ImageUrl,
+                IsAvailable = product.IsAvailable,
+                LastPurchase = product.LastPurchase,
+                LastSale = product.LastSale,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                User = product.User
+            };
+        }
+
 
         // POST: Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)
+        public async Task<IActionResult> Edit(int id, ProductViewModel product)
         {
             if (id != product.Id)
             {
@@ -118,6 +156,21 @@ namespace Shop.Web.Controllers
             {
                 try
                 {
+                    var path = product.ImageUrl;
+
+                    if (product.ImageUrl != null && product.ImageFile.Length > 0)
+                    {
+                        path = Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "wwwroot\\images\\products",
+                            product.ImageFile.FileName);
+
+                        // A simple way to use using statement
+                        using var stream = new FileStream(path, FileMode.Create);
+                        await product.ImageFile.CopyToAsync(stream);
+                        path = $"~/images/products/{product.ImageFile.FileName}";
+                    }
+
                     //TODO: Change for the logged user
                     product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
                     await this.repository.UpdateAsync(product);
@@ -164,6 +217,5 @@ namespace Shop.Web.Controllers
             await this.repository.DeleteAsync(product);
             return RedirectToAction(nameof(Index));
         }
-
     }
 }
