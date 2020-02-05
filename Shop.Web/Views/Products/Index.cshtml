@@ -48,6 +48,8 @@
             <td>
                 @if (!string.IsNullOrEmpty(item.ImageUrl)) { 
                     <img src="@Url.Content(item.ImageUrl)" alt="Image" style="width:100px;height:150px;max-width:100%;height:auto"/>
+                }else{
+            <p>No Image!!</p>
                 }
             </td>
             <td>
