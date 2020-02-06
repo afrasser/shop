@@ -3,9 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:infra="clr-namespace:Shop.UIForms.Infraestructure"
              mc:Ignorable="d"
              x:Class="Shop.UIForms.App">
     <Application.Resources>
-
+        <ResourceDictionary>
+            <!-- Locator -->
+            <infra:InstanceLocator x:Key="Locator"/>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
+   
+<!-- NOTES: -->
+<!-- There´s is no need to touch code base of views for now -->
+<!--Necesary nugguets package mvvm ligh lbs std -->
+ 
+<!-- 1. Add a name space for Locator class eg: xmlns:[xml_alias]="clr-namespace:[class_name_space]" -->
+<!-- 2. Create a ResouceDictionary for Locator instance and add instance xml tag eg: <infra:InstanceLocator x:Key="Locator"/> -->
+<!-- See LoginPage.xaml-->
