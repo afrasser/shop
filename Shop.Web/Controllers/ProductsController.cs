@@ -22,7 +22,7 @@ namespace Shop.Web.Controllers
         }
 
         // GET: Products
-        public IActionResult Index() => View(this.repository.GetAll());
+        public IActionResult Index() => View(repository.GetAll());
 
         // GET: Products/Details/5
         public IActionResult Details(int? id)
@@ -32,7 +32,7 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = this.repository.GetByIdAsync(id.Value);
+            Product product = repository.GetByIdAsync(id.Value).Result;
             if (product == null)
             {
                 return NotFound();
@@ -65,13 +65,13 @@ namespace Shop.Web.Controllers
 
                     // A simple way to use using statement
                     using var stream = new FileStream(path, FileMode.Create);
-                    await product.ImageFile.CopyToAsync(stream);
+                    await product.ImageFile.CopyToAsync(stream).ConfigureAwait(true);
                 }
 
                 path = $"~/images/products/{product.ImageFile.FileName}";
 
                 //TODO: Change how user are logged
-                product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
+                product.User = await userHelper.GetUserByEmailAsync("andrew8805@gmail.com").ConfigureAwait(true);
 
                 //TODO: Create generic mapper method
                 /*
@@ -83,14 +83,14 @@ namespace Shop.Web.Controllers
                 Product p = config.CreateMapper().Map<Product>(product);
                 */
 
-                var _product = this.ToProduct(product, path);
-                await this.repository.CreateAsync(_product);
+                var _product = ToProduct(product, path);
+                await repository.CreateAsync(_product).ConfigureAwait(true);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
         }
 
-        private Product ToProduct(ProductViewModel view, string path)
+        private static Product ToProduct(ProductViewModel view, string path)
         {
             return new Product
             {
@@ -115,17 +115,17 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = await repository.GetByIdAsync(id.Value);
+            Product product = await repository.GetByIdAsync(id.Value).ConfigureAwait(true);
             if (product == null)
             {
                 return NotFound();
             }
 
-            var view = this.ToProducViewModel(product);
+            ProductViewModel view = ToProducViewModel(product);
             return View(view);
         }
 
-        public ProductViewModel ToProducViewModel(Product product)
+        private static ProductViewModel ToProducViewModel(Product product)
         {
             return new ProductViewModel
             {
@@ -167,17 +167,17 @@ namespace Shop.Web.Controllers
 
                         // A simple way to use using statement
                         using var stream = new FileStream(path, FileMode.Create);
-                        await product.ImageFile.CopyToAsync(stream);
+                        await product.ImageFile.CopyToAsync(stream).ConfigureAwait(true);
                         path = $"~/images/products/{product.ImageFile.FileName}";
                     }
 
                     //TODO: Change for the logged user
-                    product.User = await this.userHelper.GetUserByEmailAsync("andrew8805@gmail.com");
-                    await this.repository.UpdateAsync(product);
+                    product.User = await userHelper.GetUserByEmailAsync("andrew8805@gmail.com").ConfigureAwait(true);
+                    await repository.UpdateAsync(product).ConfigureAwait(true);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await this.repository.ExistAsync(product.Id))
+                    if (!await repository.ExistAsync(product.Id).ConfigureAwait(true))
                     {
                         return NotFound();
                     }
@@ -199,7 +199,7 @@ namespace Shop.Web.Controllers
                 return NotFound();
             }
 
-            var product = this.repository.GetByIdAsync(id.Value);
+            Product product = repository.GetByIdAsync(id.Value).Result;
             if (product == null)
             {
                 return NotFound();
@@ -213,8 +213,8 @@ namespace Shop.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await this.repository.GetByIdAsync(id);
-            await this.repository.DeleteAsync(product);
+            var product = repository.GetByIdAsync(id).Result;
+            await repository.DeleteAsync(product).ConfigureAwait(true);
             return RedirectToAction(nameof(Index));
         }
     }
