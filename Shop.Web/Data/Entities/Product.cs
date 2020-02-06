@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Shop.Web.Data.Entities
 {
-    public class Product: IEntity
+    public class Product : IEntity
     {
         public int Id { get; set; }
 
@@ -32,6 +29,17 @@ namespace Shop.Web.Data.Entities
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
         public double Stock { get; set; }
 
+        public string ImageFullPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ImageUrl))
+                {
+                    return null;
+                }
+                return $"https://shopafs.azurewebsites.net{ImageUrl.Substring(1)}";
+            }
+        }
         public User User { get; set; }
     }
 }
