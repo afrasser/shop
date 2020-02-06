@@ -15,6 +15,6 @@ namespace Shop.Web.Controllers.API
         }
 
         [HttpGet]
-        public IActionResult GetProducts() => Ok(this.repository.GetAll());
+        public IActionResult GetProducts() => Ok(repository.GetAllWithUsers());
     }
 }

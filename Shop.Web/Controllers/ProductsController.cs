@@ -5,6 +5,7 @@ using Shop.Web.Data.Entities;
 using Shop.Web.Data.Helpers;
 using Shop.Web.Models;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Shop.Web.Controllers
@@ -22,7 +23,7 @@ namespace Shop.Web.Controllers
         }
 
         // GET: Products
-        public IActionResult Index() => View(repository.GetAll());
+        public IActionResult Index() => View(repository.GetAll().OrderBy(p => p.Name));
 
         // GET: Products/Details/5
         public IActionResult Details(int? id)
