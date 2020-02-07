@@ -4,6 +4,7 @@ using Shop.Web.Data;
 using Shop.Web.Data.Entities;
 using Shop.Web.Data.Helpers;
 using Shop.Web.Models;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,17 +60,20 @@ namespace Shop.Web.Controllers
 
                 if (product.ImageFile != null && product.ImageFile.Length > 0)
                 {
+                    var guid = Guid.NewGuid().ToString();
+                    var file = $"{guid}.jpg";
+
                     path = Path.Combine(
                         Directory.GetCurrentDirectory(),
                         "wwwroot\\images\\products",
-                        product.ImageFile.FileName);
+                        file);
 
                     // A simple way to use using statement
                     using var stream = new FileStream(path, FileMode.Create);
                     await product.ImageFile.CopyToAsync(stream).ConfigureAwait(true);
-                }
 
-                path = $"~/images/products/{product.ImageFile.FileName}";
+                    path = $"~/images/products/{file}";
+                }
 
                 //TODO: Change how user are logged
                 product.User = await userHelper.GetUserByEmailAsync("andrew8805@gmail.com").ConfigureAwait(true);
@@ -161,15 +165,18 @@ namespace Shop.Web.Controllers
 
                     if (product.ImageUrl != null && product.ImageFile.Length > 0)
                     {
+                        var guid = Guid.NewGuid().ToString();
+                        var file = $"{guid}.jpg";
+
                         path = Path.Combine(
                             Directory.GetCurrentDirectory(),
                             "wwwroot\\images\\products",
-                            product.ImageFile.FileName);
+                            file);
 
                         // A simple way to use using statement
                         using var stream = new FileStream(path, FileMode.Create);
                         await product.ImageFile.CopyToAsync(stream).ConfigureAwait(true);
-                        path = $"~/images/products/{product.ImageFile.FileName}";
+                        path = $"~/images/products/{file}";
                     }
 
                     //TODO: Change for the logged user

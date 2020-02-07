@@ -6,12 +6,28 @@ namespace Shop.UIForms.ViewModels
 {
     public class MainViewModel
     {
+        // Singleton atribute
+        private static MainViewModel instance;
+
         public LoginViewModel Login { get; set; }
+
+        public ProductsViewModel Products { get; set; }
 
         public MainViewModel()
         {
-            //TODO: Change this instance
-            Login = new LoginViewModel();
+            // Singleton instance
+            instance = this;
+        }
+
+        // Get Singleton instance
+        public static MainViewModel GetInstance()
+        {
+            if(instance == null)
+            {
+                return new MainViewModel();
+            }
+
+            return instance;
         }
     }
 }
