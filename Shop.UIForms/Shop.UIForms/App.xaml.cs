@@ -1,4 +1,5 @@
-﻿using Shop.UIForms.Views;
+﻿using Shop.UIForms.ViewModels;
+using Shop.UIForms.Views;
 using Xamarin.Forms;
 
 namespace Shop.UIForms
@@ -8,6 +9,9 @@ namespace Shop.UIForms
         public App()
         {
             InitializeComponent();
+
+            // Get singleton instance
+            MainViewModel.GetInstance().Login = new LoginViewModel();
 
             // NavigationPage adds a new navigation control page to the main activity
             MainPage = new NavigationPage(new LoginPage());
