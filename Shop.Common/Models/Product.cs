@@ -3,6 +3,7 @@ using System;
 
 namespace Shop.Common.Models
 {
+	// Generated on http://json2csharp.com/ (Quicktype option used)
 	public class Product
 	{
 		[JsonProperty("id")]
