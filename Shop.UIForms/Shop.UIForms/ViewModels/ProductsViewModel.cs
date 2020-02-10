@@ -10,17 +10,29 @@ namespace Shop.UIForms.ViewModels
     // BaseViewModel class not need to be changed, not need to be learned by hearth.
     public class ProductsViewModel : BaseViewModel
     {
+        #region Attributes
         private APIServices apiService;
-
+        private bool isRefreshing;
         // This is necessary to do in every viewmodel to refresh the view.
         private ObservableCollection<Product> products;
+        #endregion
+
+        #region Properties
         public ObservableCollection<Product> Products
         {
             get => products;
-            set { SetValue(ref products, value); }
+            // Use SetValue by ref to update ViewModel correctly
+            set => SetValue(ref products, value);
         }
 
+        public bool IsRefreshing
+        {
+            get => isRefreshing;
+            set => SetValue(ref isRefreshing, value);
+        }
+        #endregion
 
+        #region Methods
         public ProductsViewModel()
         {
             apiService = new APIServices();
@@ -29,6 +41,7 @@ namespace Shop.UIForms.ViewModels
 
         private async void LoadProducts()
         {
+            IsRefreshing = true;
             var response = await apiService.GetListAsync<Product>(
                 "https://shopafs.azurewebsites.net/",
                 "/api",
@@ -45,6 +58,9 @@ namespace Shop.UIForms.ViewModels
 
             var myProducts = (List<Product>)response.Result;
             Products = new ObservableCollection<Product>(myProducts);
+
+            IsRefreshing = false;
         }
+        #endregion
     }
 }
