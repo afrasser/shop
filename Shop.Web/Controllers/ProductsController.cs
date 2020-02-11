@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Web.Data;
 using Shop.Web.Data.Entities;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Shop.Web.Controllers
 {
-    //TODO: Fix error on ProductsController
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly IProductRepository repository;
@@ -75,8 +76,7 @@ namespace Shop.Web.Controllers
                     path = $"~/images/products/{file}";
                 }
 
-                //TODO: Change how user are logged
-                product.User = await userHelper.GetUserByEmailAsync("andrew8805@gmail.com").ConfigureAwait(true);
+                product.User = await userHelper.GetUserByEmailAsync(User.Identity.Name).ConfigureAwait(true);
 
                 //TODO: Create generic mapper method
                 /*
@@ -179,8 +179,7 @@ namespace Shop.Web.Controllers
                         path = $"~/images/products/{file}";
                     }
 
-                    //TODO: Change for the logged user
-                    product.User = await userHelper.GetUserByEmailAsync("andrew8805@gmail.com").ConfigureAwait(true);
+                    product.User = await userHelper.GetUserByEmailAsync(User.Identity.Name).ConfigureAwait(true);
                     await repository.UpdateAsync(product).ConfigureAwait(true);
                 }
                 catch (DbUpdateConcurrencyException)
