@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Web.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Shop.Web.Data.Helpers;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Shop.Web
 {
@@ -57,6 +59,20 @@ namespace Shop.Web
                 cfg.Password.RequireUppercase = false;
                 cfg.Password.RequiredLength = 6;
             }).AddEntityFrameworkStores<DataContext>();
+
+            // Add Token Authentication 
+            services.AddAuthentication()
+                .AddCookie()
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = this.Configuration["Tokens:Issuer"],
+                        ValidAudience = this.Configuration["Tokens:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(this.Configuration["Tokens:Key"]))
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
