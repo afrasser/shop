@@ -1,20 +1,31 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Shop.Web.Data.Entities;
 using Shop.Web.Data.Helpers;
 using Shop.Web.Models;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Shop.Web.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AccountController : Controller
     {
         private readonly IUserHelper userHelper;
+        private readonly IConfiguration configuration;
 
-        public AccountController(IUserHelper userHelper)
+        public AccountController(IUserHelper userHelper, IConfiguration configuration)
         {
             this.userHelper = userHelper;
+            this.configuration = configuration;
         }
 
         public IActionResult Login()
@@ -82,7 +93,6 @@ namespace Shop.Web.Controllers
                         return this.View(model);
                     }
 
-
                     var loginViewModel = new LoginViewModel
                     {
                         Password = model.Password,
@@ -111,7 +121,7 @@ namespace Shop.Web.Controllers
         {
             var user = await userHelper.GetUserByEmailAsync(User.Identity.Name);
             var model = new ChangeUserViewModel();
-            if(user != null)
+            if (user != null)
             {
                 model.FirstName = user.FirstName;
                 model.LastName = user.LastName;
@@ -119,7 +129,6 @@ namespace Shop.Web.Controllers
 
             return View();
         }
-
 
         [HttpPost]
         public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
@@ -180,6 +189,49 @@ namespace Shop.Web.Controllers
             }
 
             return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateToken([FromBody] LoginViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var user = await this.userHelper.GetUserByEmailAsync(model.UserName);
+                if (user != null)
+                {
+                    var result = await this.userHelper.ValidatePasswordAsync(
+                        user,
+                        model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        var claims = new[]
+                        {
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                        };
+
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.configuration["Tokens:Key"]));
+                        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var token = new JwtSecurityToken(
+                            this.configuration["Tokens:Issuer"],
+                            this.configuration["Tokens:Audience"],
+                            claims,
+                            expires: DateTime.UtcNow.AddDays(15),
+                            signingCredentials: credentials);
+
+                        var results = new
+                        {
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo
+                        };
+
+                        return Created(string.Empty, results);
+                    }
+                }
+            }
+
+            return this.BadRequest();
         }
     }
 }

@@ -19,5 +19,7 @@
 
         Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword);
         Task<IdentityResult> UpdateUserAsync(User user);
+
+        Task<SignInResult> ValidatePasswordAsync(User user, string passowrd);
     }
 }
