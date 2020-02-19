@@ -32,13 +32,13 @@ namespace Shop.Web.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ProductNotFound");
             }
 
             Product product = repository.GetByIdAsync(id.Value).Result;
             if (product == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ProductNotFound");
             }
 
             return View(product);
@@ -223,6 +223,11 @@ namespace Shop.Web.Controllers
             var product = repository.GetByIdAsync(id).Result;
             await repository.DeleteAsync(product).ConfigureAwait(true);
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult ProductNotFound()
+        {
+            return View();
         }
     }
 }
