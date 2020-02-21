@@ -25,19 +25,19 @@ namespace Shop.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
-
-            // Set local dabatase connection injectable on any class constructor
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
             /*
              * Transient objects are always different; a new instance is provided to every controller and every service.
              * Scoped objects are the same within a request, but different across different requests.
              * Singleton objects are the same for every object and every request.
              */
+
+            services.AddControllersWithViews();
+
+            // Set dabatase connection injectable on any class constructor
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             // Inject Db Seed Service
             services.AddTransient<SeedDb>();
@@ -47,6 +47,9 @@ namespace Shop.Web
 
             // Inject user helper
             services.AddScoped<IUserHelper, UserHelper>();
+
+            services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
             // Configure User registration rules
             services.AddIdentity<User, IdentityRole>(cfg =>
